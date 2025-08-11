@@ -33,9 +33,9 @@ export function generateKindleLink(title: string, author: string, asin?: string)
     return `https://read.amazon.com/?asin=${asin}`;
   }
   
-  // Search specifically for Kindle edition
-  const query = encodeURIComponent(`${title} ${author} kindle edition`);
-  return `https://www.amazon.com/s?k=${query}&i=digital-text&rh=n%3A133140011&tag=twbooks-20`;
+  // Search specifically for Kindle edition using digital-text category
+  const query = encodeURIComponent(`${title} ${author}`);
+  return `https://www.amazon.com/s?k=${query}&i=digital-text`;
 }
 
 export function generateGoodreadsLink(title: string, author: string): string {

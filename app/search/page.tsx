@@ -8,16 +8,33 @@ import { SearchResult } from '@/types';
 import { mutate } from 'swr';
 import { getCoverUrl } from '@/lib/api/openLibrary';
 
+// Helper function to detect if query is likely an author name
+function isLikelyAuthorName(query: string): boolean {
+  const trimmed = query.trim();
+  const words = trimmed.split(/\s+/);
+  
+  if (words.length < 2 || words.length > 4) return false;
+  
+  // Check if it matches common name patterns
+  const namePattern = /^[A-Za-z][a-z]*(\s+[A-Za-z][a-z]*){1,3}$/;
+  return namePattern.test(trimmed);
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const [searchMode, setSearchMode] = useState<'general' | 'author'>('general');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
+
+    // Detect if searching by author name
+    const isAuthor = isLikelyAuthorName(query.trim());
+    setSearchMode(isAuthor ? 'author' : 'general');
 
     setIsSearching(true);
     setError(null);
@@ -135,6 +152,19 @@ export default function SearchPage() {
 
       {/* Search Results */}
       <div className="p-4">
+        {/* Show search mode indicator */}
+        {results.length > 0 && query && (
+          <div className="mb-4 text-sm text-gray-600 dark:text-dark-text-secondary">
+            {searchMode === 'author' ? (
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+                Searching books by author: <strong className="ml-1">{query}</strong>
+              </span>
+            ) : (
+              <span>Showing results for: <strong>{query}</strong></span>
+            )}
+          </div>
+        )}
+
         {results.length === 0 && query && !isSearching && (
           <div className="text-center py-12">
             <FiSearch size={48} className="mx-auto text-gray-400 dark:text-dark-text-secondary mb-4" />
