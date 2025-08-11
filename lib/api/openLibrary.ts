@@ -77,18 +77,27 @@ export async function searchBooks(query: string, limit: number = 20): Promise<Se
         return false;
       }
 
-      // 3. Filter out books with CJK characters (Chinese, Japanese, Korean)
-      const titleHasCJK = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(book.title);
-      if (titleHasCJK) {
+      // 3. Filter out books with non-English characters in title
+      // Check for: CJK (Chinese, Japanese, Korean), Cyrillic (Russian), Arabic, Hebrew, etc.
+      const titleHasNonEnglish = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u0400-\u04ff\u0500-\u052f\u0600-\u06ff\u0590-\u05ff]/.test(book.title);
+      if (titleHasNonEnglish) {
         return false;
       }
 
-      // 4. Check author names for CJK characters
-      const authorHasCJK = book.author_name.some(author => 
-        /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(author)
-      );
-      if (authorHasCJK) {
-        return false;
+      // 4. Skip author name check for now - many classic authors have names in original scripts
+      // But we already filtered by title being in English, which is what matters for readability
+      
+      // Additional check: If book has multiple languages, English should be first or primary
+      if (book.language && book.language.length > 1) {
+        const firstLang = book.language[0]?.toLowerCase();
+        // If first language is not English, skip (unless it's the only English edition available)
+        if (firstLang && !['eng', 'en', 'english'].includes(firstLang)) {
+          // Check if English is at least in top 2 languages
+          const secondLang = book.language[1]?.toLowerCase();
+          if (!['eng', 'en', 'english'].includes(secondLang || '')) {
+            return false;
+          }
+        }
       }
 
       // 5. Check subjects for non-English indicators
@@ -203,18 +212,32 @@ export async function searchBooksByAuthor(authorName: string, limit: number = 20
         return false;
       }
 
-      // 4. Filter out books with CJK characters (Chinese, Japanese, Korean)
-      const titleHasCJK = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(book.title);
-      if (titleHasCJK) {
+      // 4. Filter out books with non-English characters in title
+      // Check for: CJK (Chinese, Japanese, Korean), Cyrillic (Russian), Arabic, Hebrew, etc.
+      const titleHasNonEnglish = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u0400-\u04ff\u0500-\u052f\u0600-\u06ff\u0590-\u05ff]/.test(book.title);
+      if (titleHasNonEnglish) {
         return false;
       }
 
-      // 5. Check author names for CJK characters
-      const authorHasCJK = book.author_name.some(author => 
-        /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(author)
+      // 5. Check author names for non-English characters
+      const authorHasNonEnglish = book.author_name.some(author => 
+        /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\u0400-\u04ff\u0500-\u052f\u0600-\u06ff\u0590-\u05ff]/.test(author)
       );
-      if (authorHasCJK) {
+      if (authorHasNonEnglish) {
         return false;
+      }
+      
+      // Additional check: If book has multiple languages, English should be first or primary
+      if (book.language && book.language.length > 1) {
+        const firstLang = book.language[0]?.toLowerCase();
+        // If first language is not English, skip
+        if (firstLang && !['eng', 'en', 'english'].includes(firstLang)) {
+          // Check if English is at least in top 2 languages
+          const secondLang = book.language[1]?.toLowerCase();
+          if (!['eng', 'en', 'english'].includes(secondLang || '')) {
+            return false;
+          }
+        }
       }
 
       // 6. Check subjects for non-English indicators
