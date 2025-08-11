@@ -17,22 +17,8 @@ export default function Timeline() {
   const books = data?.data as Book[] || [];
 
   const handleUnfollow = async (id: string) => {
-    setActionLoading(id);
-    try {
-      const response = await fetch(`/api/books/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        mutate('/api/books');
-      } else {
-        console.error('Failed to unfollow book');
-      }
-    } catch (error) {
-      console.error('Error unfollowing book:', error);
-    } finally {
-      setActionLoading(null);
-    }
+    // Just refresh the data, the BookCard handles the DELETE
+    mutate('/api/books');
   };
 
   const handleRefreshQuote = async (id: string) => {
