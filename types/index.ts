@@ -36,6 +36,11 @@ export interface Quote {
   author: string;
   book: string;
   source?: string;
+  page_number?: number;
+  chapter?: string;
+  verified?: boolean;
+  fetch_source?: 'goodreads' | 'wikiquote' | 'open_library' | 'project_gutenberg' | 'local' | 'fallback';
+  scraped_at?: string;
 }
 
 export interface DatabaseInterface {

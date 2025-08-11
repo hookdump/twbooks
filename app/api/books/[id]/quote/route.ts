@@ -42,7 +42,8 @@ export async function GET(
       return NextResponse.json(
         {
           success: false,
-          error: 'No quote found for this book',
+          error: 'No authentic quotes found for this book. We only return real quotes from actual books.',
+          message: 'Consider checking the title and author spelling, or try a different book.'
         },
         { status: 404 }
       );
