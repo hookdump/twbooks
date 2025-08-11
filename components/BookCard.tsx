@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Book } from '@/types';
-import { FiMessageCircle, FiRepeat, FiHeart, FiShare, FiExternalLink, FiRefreshCw, FiMoreHorizontal } from 'react-icons/fi';
+import { FiMessageCircle, FiShare, FiExternalLink, FiRefreshCw, FiMoreHorizontal, FiX } from 'react-icons/fi';
+import { FaAmazon, FaBookReader } from 'react-icons/fa';
 import { generateAmazonLink, generateKindleLink, generateGoodreadsLink } from '@/lib/utils/amazon';
 
 interface BookCardProps {
@@ -15,8 +16,28 @@ interface BookCardProps {
 
 export default function BookCard({ book, onUnfollow, onRefreshQuote, isLoading = false }: BookCardProps) {
   const [imageError, setImageError] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isRetweeted, setIsRetweeted] = useState(false);
+  const [isUnfollowing, setIsUnfollowing] = useState(false);
+
+  const handleUnfollow = async () => {
+    if (!onUnfollow || isUnfollowing) return;
+    
+    setIsUnfollowing(true);
+    try {
+      const response = await fetch(`/api/books/${book.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        onUnfollow(book.id);
+      } else {
+        console.error('Failed to unfollow book');
+      }
+    } catch (error) {
+      console.error('Error unfollowing book:', error);
+    } finally {
+      setIsUnfollowing(false);
+    }
+  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -84,14 +105,14 @@ export default function BookCard({ book, onUnfollow, onRefreshQuote, isLoading =
           {/* Tweet Text */}
           <div className="mt-1 space-y-2">
             <div className="tweet-content twitter-text">
-              <p className="mb-2">
-                📖 Currently reading: <strong>{book.title}</strong>
-              </p>
               {book.quote && (
-                <blockquote className="italic">
+                <blockquote className="mb-3">
                   &ldquo;{book.quote}&rdquo;
                 </blockquote>
               )}
+              <p className="text-twitter-gray-500 dark:text-dark-text-secondary text-sm">
+                From <strong>{book.title}</strong>
+              </p>
             </div>
 
             {/* Book metadata */}
@@ -108,57 +129,43 @@ export default function BookCard({ book, onUnfollow, onRefreshQuote, isLoading =
             )}
           </div>
 
-          {/* Action Buttons - Twitter style */}
-          <div className="flex items-center justify-between mt-3 max-w-md">
-            {/* Reply */}
-            <button className="twitter-icon-button reply group">
-              <div className="flex items-center space-x-2">
-                <FiMessageCircle size={18} />
-                <span className="text-13 group-hover:text-twitter-blue">0</span>
-              </div>
-            </button>
-
-            {/* Retweet */}
-            <button 
-              className={`twitter-icon-button retweet group ${isRetweeted ? 'text-green-600' : ''}`}
-              onClick={() => setIsRetweeted(!isRetweeted)}
-            >
-              <div className="flex items-center space-x-2">
-                <FiRepeat size={18} />
-                <span className="text-13 group-hover:text-green-600">{isRetweeted ? 1 : 0}</span>
-              </div>
-            </button>
-
-            {/* Like */}
-            <button 
-              className={`twitter-icon-button like group ${isLiked ? 'text-red-600' : ''}`}
-              onClick={() => setIsLiked(!isLiked)}
-            >
-              <div className="flex items-center space-x-2">
-                <FiHeart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                <span className="text-13 group-hover:text-red-600">{isLiked ? 1 : 0}</span>
-              </div>
-            </button>
-
-            {/* Share/More Actions */}
-            <div className="flex items-center space-x-1">
-              {/* External links */}
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between mt-4">
+            {/* Main Action Buttons */}
+            <div className="flex items-center space-x-3">
+              {/* Amazon Link */}
               <a
                 href={generateAmazonLink(book.title, book.author, book.isbn)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="twitter-icon-button"
-                title="View on Amazon"
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-full transition-colors duration-200"
+                title="Buy on Amazon"
               >
-                <FiExternalLink size={16} />
+                <FaAmazon size={14} />
+                <span>Amazon</span>
               </a>
               
+              {/* Kindle Link */}
+              <a
+                href={generateKindleLink(book.title, book.author)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-full transition-colors duration-200"
+                title="Read on Kindle"
+              >
+                <FaBookReader size={14} />
+                <span>Kindle</span>
+              </a>
+            </div>
+
+            {/* Secondary Actions */}
+            <div className="flex items-center space-x-2">
               {/* Refresh quote */}
               {onRefreshQuote && (
                 <button
                   onClick={() => onRefreshQuote(book.id)}
                   disabled={isLoading}
-                  className="twitter-icon-button disabled:opacity-50"
+                  className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors disabled:opacity-50"
                   title="Get new quote"
                 >
                   <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
@@ -166,9 +173,24 @@ export default function BookCard({ book, onUnfollow, onRefreshQuote, isLoading =
               )}
               
               {/* Share */}
-              <button className="twitter-icon-button" title="Share">
+              <button 
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" 
+                title="Share"
+              >
                 <FiShare size={16} />
               </button>
+
+              {/* Unfollow */}
+              {onUnfollow && (
+                <button
+                  onClick={handleUnfollow}
+                  disabled={isUnfollowing}
+                  className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                  title="Unfollow book"
+                >
+                  <FiX size={16} />
+                </button>
+              )}
             </div>
           </div>
         </div>
