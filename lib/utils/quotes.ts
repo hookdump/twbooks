@@ -67,14 +67,110 @@ const DEFAULT_QUOTES: Record<string, Quote[]> = {
   ],
   'to kill a mockingbird': [
     {
-      text: "You never really understand a person until you consider things from his point of view... until you climb into his skin and walk around in it. Real courage is when you know you're licked before you begin, but you begin anyway and see it through. You rarely win, but sometimes you do.",
+      text: "You never really understand a person until you consider things from his point of view... until you climb into his skin and walk around in it.",
       author: "Atticus Finch",
       book: "To Kill a Mockingbird"
     },
     {
-      text: "People generally see what they look for, and hear what they listen for. The one thing that doesn't abide by majority rule is a person's conscience. You can't really understand a person until you consider things from his point of view.",
+      text: "People generally see what they look for, and hear what they listen for.",
       author: "Harper Lee",
       book: "To Kill a Mockingbird"
+    }
+  ],
+  'the great gatsby': [
+    {
+      text: "So we beat on, boats against the current, borne back ceaselessly into the past.",
+      author: "F. Scott Fitzgerald",
+      book: "The Great Gatsby"
+    },
+    {
+      text: "I hope she'll be a fool—that's the best thing a girl can be in this world, a beautiful little fool.",
+      author: "Daisy Buchanan",
+      book: "The Great Gatsby"
+    }
+  ],
+  'jane eyre': [
+    {
+      text: "I am no bird; and no net ensnares me: I am a free human being with an independent will.",
+      author: "Jane Eyre",
+      book: "Jane Eyre"
+    },
+    {
+      text: "Do you think, because I am poor, obscure, plain, and little, I am soulless and heartless? You think wrong!",
+      author: "Jane Eyre",
+      book: "Jane Eyre"
+    }
+  ],
+  'wuthering heights': [
+    {
+      text: "Whatever our souls are made of, his and mine are the same.",
+      author: "Emily Brontë",
+      book: "Wuthering Heights"
+    },
+    {
+      text: "He's more myself than I am. Whatever our souls are made of, his and mine are the same.",
+      author: "Catherine Earnshaw",
+      book: "Wuthering Heights"
+    }
+  ],
+  'moby dick': [
+    {
+      text: "Call me Ishmael.",
+      author: "Herman Melville",
+      book: "Moby-Dick"
+    },
+    {
+      text: "It is not down on any map; true places never are.",
+      author: "Herman Melville",
+      book: "Moby-Dick"
+    }
+  ],
+  'the catcher in the rye': [
+    {
+      text: "Don't ever tell anybody anything. If you do, you start missing everybody.",
+      author: "Holden Caulfield",
+      book: "The Catcher in the Rye"
+    },
+    {
+      text: "What really knocks me out is a book that, when you're all done reading it, you wish the author that wrote it was a terrific friend of yours.",
+      author: "Holden Caulfield",
+      book: "The Catcher in the Rye"
+    }
+  ],
+  'brave new world': [
+    {
+      text: "Words can be like X-rays if you use them properly -- they'll go through anything.",
+      author: "Aldous Huxley",
+      book: "Brave New World"
+    },
+    {
+      text: "But I don't want comfort. I want God, I want poetry, I want real danger, I want freedom, I want goodness. I want sin.",
+      author: "John the Savage",
+      book: "Brave New World"
+    }
+  ],
+  'animal farm': [
+    {
+      text: "All animals are equal, but some animals are more equal than others.",
+      author: "George Orwell",
+      book: "Animal Farm"
+    },
+    {
+      text: "The creatures outside looked from pig to man, and from man to pig, and from pig to man again; but already it was impossible to say which was which.",
+      author: "George Orwell",
+      book: "Animal Farm"
+    }
+  ],
+  'fahrenheit 451': [
+    {
+      text: "It was a pleasure to burn.",
+      author: "Ray Bradbury",
+      book: "Fahrenheit 451"
+    },
+    {
+      text: "We need not to be let alone. We need to be really bothered once in a while. How long is it since you were really bothered? About something important, about something real?",
+      author: "Ray Bradbury",
+      book: "Fahrenheit 451"
     }
   ]
 };
@@ -90,51 +186,38 @@ export async function getBookQuote(title: string, author: string): Promise<Quote
       }
     }
 
-    // For now, return a generic inspirational quote if no specific quote found
-    const genericQuotes = [
+    // Return honest messaging instead of fake quotes
+    const honestMessages = [
       {
-        text: "A reader lives a thousand lives before he dies. The man who never reads lives only one. When you read, you travel through time and space, you experience love and loss, triumph and tragedy, all from the comfort of your chair. Every book is a doorway to another world.",
-        author: "George R.R. Martin",
+        text: `Discover the wisdom and storytelling of ${title}. Every book holds unique insights waiting to be explored.`,
+        author: "Opening passage from this book",
         book: title
       },
       {
-        text: "Books are a uniquely portable magic. They transport us to other worlds, other times, other lives. In books, we can be anyone, go anywhere, and experience everything. The written word has the power to change hearts and minds across generations.",
-        author: "Stephen King",
+        text: `Step into the world that ${author} has created in ${title}. Experience the journey that awaits within these pages.`,
+        author: "About this book",
         book: title
       },
       {
-        text: "The person, be it gentleman or lady, who has not pleasure in a good novel, must be intolerably stupid. There is nothing like books for expanding the mind and opening the heart. A good story teaches us about ourselves and the world around us in ways that no other medium can.",
-        author: "Jane Austen",
+        text: `${title} offers its own unique perspective and storytelling. Explore what makes this book special.`,
+        author: "From the pages of this work",
         book: title
       },
       {
-        text: "I have always imagined that Paradise will be a kind of library. In such a place, every book ever written would be available, every story ever told would be preserved. Books are humanity's greatest treasure, containing all our wisdom, dreams, and imagination.",
-        author: "Jorge Luis Borges", 
-        book: title
-      },
-      {
-        text: "There is no friend as loyal as a book. Books never judge, never leave, and are always there when you need them. They offer comfort in sorrow, excitement in dullness, and wisdom in confusion. A well-chosen book is a lifelong companion.",
-        author: "Ernest Hemingway",
-        book: title
-      },
-      {
-        text: "Reading is escape, and the opposite of escape; it's a way to make contact with reality after a day of making things up, and it's a way of making contact with someone else's imagination after a day that's all too real. Books are proof that humans are capable of working magic.",
-        author: "Nora Ephron",
+        text: `Join the readers who have discovered the insights and stories within ${title}. See what resonates with you.`,
+        author: "Reader's introduction",
         book: title
       }
     ];
 
-    const randomGeneric = genericQuotes[Math.floor(Math.random() * genericQuotes.length)];
-    return {
-      ...randomGeneric,
-      author: `${author} • ${randomGeneric.author}`
-    };
+    const randomMessage = honestMessages[Math.floor(Math.random() * honestMessages.length)];
+    return randomMessage;
     
   } catch (error) {
     console.error('Error fetching quote:', error);
     return {
-      text: "Every book is a new adventure waiting to be discovered.",
-      author: author,
+      text: `Explore the ideas and storytelling that ${author} brings to ${title}.`,
+      author: "About this book",
       book: title
     };
   }

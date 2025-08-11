@@ -44,18 +44,97 @@ export async function searchBooks(query: string, limit: number = 20): Promise<Se
     );
 
     return response.data.docs.filter(book => {
-      // Filter for English books only
-      const hasEnglish = !book.language || 
-                         book.language.length === 0 || 
-                         book.language.some(lang => 
-                           lang && (lang.toLowerCase() === 'eng' || 
-                                   lang.toLowerCase() === 'en' || 
-                                   lang.toLowerCase() === 'english'));
-      
-      return book.title && 
-             book.author_name && 
-             book.author_name.length > 0 &&
-             hasEnglish;
+      // AGGRESSIVE English-only filtering
+      // 1. Must have title and author
+      if (!book.title || !book.author_name || book.author_name.length === 0) {
+        return false;
+      }
+
+      // 2. Check language field - must contain English
+      let hasEnglishLanguage = false;
+      if (!book.language || book.language.length === 0) {
+        // No language specified - assume English for older/legacy entries
+        hasEnglishLanguage = true;
+      } else {
+        // Language specified - must contain English and primarily be English
+        const englishCount = book.language.filter(lang => {
+          if (!lang) return false;
+          const langLower = lang.toLowerCase().trim();
+          return langLower === 'eng' || 
+                 langLower === 'en' || 
+                 langLower === 'english' ||
+                 langLower === 'en-us' ||
+                 langLower === 'en-gb' ||
+                 langLower === 'en-ca' ||
+                 langLower === 'en-au';
+        }).length;
+        
+        // Must have English
+        hasEnglishLanguage = englishCount > 0;
+      }
+
+      if (!hasEnglishLanguage) {
+        return false;
+      }
+
+      // 3. Filter out books with CJK characters (Chinese, Japanese, Korean)
+      const titleHasCJK = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(book.title);
+      if (titleHasCJK) {
+        return false;
+      }
+
+      // 4. Check author names for CJK characters
+      const authorHasCJK = book.author_name.some(author => 
+        /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(author)
+      );
+      if (authorHasCJK) {
+        return false;
+      }
+
+      // 5. Check subjects for non-English indicators
+      if (book.subject && book.subject.length > 0) {
+        const nonEnglishSubjects = book.subject.some(subject => {
+          if (!subject) return false;
+          const subjectLower = subject.toLowerCase();
+          return subjectLower.includes('chinese') ||
+                 subjectLower.includes('spanish') ||
+                 subjectLower.includes('french') ||
+                 subjectLower.includes('german') ||
+                 subjectLower.includes('japanese') ||
+                 subjectLower.includes('korean') ||
+                 subjectLower.includes('arabic') ||
+                 subjectLower.includes('russian') ||
+                 subjectLower.includes('portuguese') ||
+                 subjectLower.includes('italian') ||
+                 subjectLower.includes('dutch') ||
+                 subjectLower.includes('hindi') ||
+                 subjectLower.includes('bengali') ||
+                 subjectLower.includes('urdu') ||
+                 subjectLower.includes('persian') ||
+                 subjectLower.includes('turkish') ||
+                 subjectLower.includes('hebrew') ||
+                 subjectLower.includes('polish') ||
+                 subjectLower.includes('czech') ||
+                 subjectLower.includes('hungarian') ||
+                 subjectLower.includes('swedish') ||
+                 subjectLower.includes('norwegian') ||
+                 subjectLower.includes('danish') ||
+                 subjectLower.includes('finnish') ||
+                 subjectLower.includes('greek') ||
+                 subjectLower.includes('vietnamese') ||
+                 subjectLower.includes('thai') ||
+                 subjectLower.includes('indonesian') ||
+                 subjectLower.includes('malay') ||
+                 subjectLower.includes('filipino') ||
+                 subjectLower.includes('tagalog');
+        });
+        
+        if (nonEnglishSubjects) {
+          return false;
+        }
+      }
+
+      return true;
     }).slice(0, limit); // Limit results after filtering
   } catch (error) {
     console.error('Error searching books:', error);
@@ -81,24 +160,107 @@ export async function searchBooksByAuthor(authorName: string, limit: number = 20
     );
 
     return response.data.docs.filter(book => {
-      const hasEnglish = !book.language || 
-                         book.language.length === 0 || 
-                         book.language.some(lang => 
-                           lang && (lang.toLowerCase() === 'eng' || 
-                                   lang.toLowerCase() === 'en' || 
-                                   lang.toLowerCase() === 'english'));
-      
-      // Check if the author matches (case insensitive)
+      // AGGRESSIVE English-only filtering (same as main search)
+      // 1. Must have title and author
+      if (!book.title || !book.author_name || book.author_name.length === 0) {
+        return false;
+      }
+
+      // 2. Check if the author matches (case insensitive)
       const authorMatches = book.author_name?.some(author => 
         author.toLowerCase().includes(authorName.toLowerCase()) ||
         authorName.toLowerCase().includes(author.toLowerCase())
       );
       
-      return book.title && 
-             book.author_name && 
-             book.author_name.length > 0 &&
-             hasEnglish &&
-             authorMatches;
+      if (!authorMatches) {
+        return false;
+      }
+
+      // 3. Check language field - must contain English
+      let hasEnglishLanguage = false;
+      if (!book.language || book.language.length === 0) {
+        // No language specified - assume English for older/legacy entries
+        hasEnglishLanguage = true;
+      } else {
+        // Language specified - must contain English and primarily be English
+        const englishCount = book.language.filter(lang => {
+          if (!lang) return false;
+          const langLower = lang.toLowerCase().trim();
+          return langLower === 'eng' || 
+                 langLower === 'en' || 
+                 langLower === 'english' ||
+                 langLower === 'en-us' ||
+                 langLower === 'en-gb' ||
+                 langLower === 'en-ca' ||
+                 langLower === 'en-au';
+        }).length;
+        
+        // Must have English
+        hasEnglishLanguage = englishCount > 0;
+      }
+
+      if (!hasEnglishLanguage) {
+        return false;
+      }
+
+      // 4. Filter out books with CJK characters (Chinese, Japanese, Korean)
+      const titleHasCJK = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(book.title);
+      if (titleHasCJK) {
+        return false;
+      }
+
+      // 5. Check author names for CJK characters
+      const authorHasCJK = book.author_name.some(author => 
+        /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/.test(author)
+      );
+      if (authorHasCJK) {
+        return false;
+      }
+
+      // 6. Check subjects for non-English indicators
+      if (book.subject && book.subject.length > 0) {
+        const nonEnglishSubjects = book.subject.some(subject => {
+          if (!subject) return false;
+          const subjectLower = subject.toLowerCase();
+          return subjectLower.includes('chinese') ||
+                 subjectLower.includes('spanish') ||
+                 subjectLower.includes('french') ||
+                 subjectLower.includes('german') ||
+                 subjectLower.includes('japanese') ||
+                 subjectLower.includes('korean') ||
+                 subjectLower.includes('arabic') ||
+                 subjectLower.includes('russian') ||
+                 subjectLower.includes('portuguese') ||
+                 subjectLower.includes('italian') ||
+                 subjectLower.includes('dutch') ||
+                 subjectLower.includes('hindi') ||
+                 subjectLower.includes('bengali') ||
+                 subjectLower.includes('urdu') ||
+                 subjectLower.includes('persian') ||
+                 subjectLower.includes('turkish') ||
+                 subjectLower.includes('hebrew') ||
+                 subjectLower.includes('polish') ||
+                 subjectLower.includes('czech') ||
+                 subjectLower.includes('hungarian') ||
+                 subjectLower.includes('swedish') ||
+                 subjectLower.includes('norwegian') ||
+                 subjectLower.includes('danish') ||
+                 subjectLower.includes('finnish') ||
+                 subjectLower.includes('greek') ||
+                 subjectLower.includes('vietnamese') ||
+                 subjectLower.includes('thai') ||
+                 subjectLower.includes('indonesian') ||
+                 subjectLower.includes('malay') ||
+                 subjectLower.includes('filipino') ||
+                 subjectLower.includes('tagalog');
+        });
+        
+        if (nonEnglishSubjects) {
+          return false;
+        }
+      }
+
+      return true;
     }).slice(0, limit);
   } catch (error) {
     console.error('Error searching books by author:', error);
