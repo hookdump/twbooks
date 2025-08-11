@@ -100,42 +100,54 @@ export async function searchBooks(query: string, limit: number = 20): Promise<Se
         }
       }
 
-      // 5. Check subjects for non-English indicators
+      // 5. Check publisher for Russian/Cyrillic characters (indicates Russian edition)
+      if (book.publisher && Array.isArray(book.publisher)) {
+        const hasRussianPublisher = book.publisher.some(pub => 
+          /[\u0400-\u04ff\u0500-\u052f]/.test(pub) || // Cyrillic characters
+          pub.toLowerCase().includes('russian') ||
+          pub.toLowerCase().includes('советск') ||
+          pub.toLowerCase().includes('москва')
+        );
+        if (hasRussianPublisher) {
+          return false;
+        }
+      }
+      
+      // 6. Check subjects for non-English indicators and Cyrillic characters
       if (book.subject && book.subject.length > 0) {
+        const hasRussianSubject = book.subject.some(subject => {
+          if (!subject) return false;
+          // Check for Cyrillic characters in subject
+          if (/[\u0400-\u04ff\u0500-\u052f]/.test(subject)) {
+            return true;
+          }
+          const subjectLower = subject.toLowerCase();
+          // Check for Russian-specific indicators
+          return subjectLower.includes('russian') ||
+                 subjectLower.includes('советск') ||
+                 subjectLower.includes('россия') ||
+                 subjectLower.includes('moskva') ||
+                 subjectLower.includes('soviet');
+        });
+        
+        if (hasRussianSubject) {
+          return false;
+        }
+        
+        // Also check for other foreign language indicators
         const nonEnglishSubjects = book.subject.some(subject => {
           if (!subject) return false;
           const subjectLower = subject.toLowerCase();
-          return subjectLower.includes('chinese') ||
-                 subjectLower.includes('spanish') ||
-                 subjectLower.includes('french') ||
-                 subjectLower.includes('german') ||
-                 subjectLower.includes('japanese') ||
-                 subjectLower.includes('korean') ||
-                 subjectLower.includes('arabic') ||
-                 subjectLower.includes('russian') ||
-                 subjectLower.includes('portuguese') ||
-                 subjectLower.includes('italian') ||
-                 subjectLower.includes('dutch') ||
-                 subjectLower.includes('hindi') ||
-                 subjectLower.includes('bengali') ||
-                 subjectLower.includes('urdu') ||
-                 subjectLower.includes('persian') ||
-                 subjectLower.includes('turkish') ||
-                 subjectLower.includes('hebrew') ||
-                 subjectLower.includes('polish') ||
-                 subjectLower.includes('czech') ||
-                 subjectLower.includes('hungarian') ||
-                 subjectLower.includes('swedish') ||
-                 subjectLower.includes('norwegian') ||
-                 subjectLower.includes('danish') ||
-                 subjectLower.includes('finnish') ||
-                 subjectLower.includes('greek') ||
-                 subjectLower.includes('vietnamese') ||
-                 subjectLower.includes('thai') ||
-                 subjectLower.includes('indonesian') ||
-                 subjectLower.includes('malay') ||
-                 subjectLower.includes('filipino') ||
-                 subjectLower.includes('tagalog');
+          return subjectLower.includes('chinese literature') ||
+                 subjectLower.includes('spanish literature') ||
+                 subjectLower.includes('french literature') ||
+                 subjectLower.includes('german literature') ||
+                 subjectLower.includes('japanese literature') ||
+                 subjectLower.includes('korean literature') ||
+                 subjectLower.includes('arabic literature') ||
+                 subjectLower.includes('portuguese literature') ||
+                 subjectLower.includes('italian literature') ||
+                 subjectLower.includes('foreign language');
         });
         
         if (nonEnglishSubjects) {
@@ -240,42 +252,54 @@ export async function searchBooksByAuthor(authorName: string, limit: number = 20
         }
       }
 
-      // 6. Check subjects for non-English indicators
+      // 6. Check publisher for Russian/Cyrillic characters (indicates Russian edition)
+      if (book.publisher && Array.isArray(book.publisher)) {
+        const hasRussianPublisher = book.publisher.some(pub => 
+          /[\u0400-\u04ff\u0500-\u052f]/.test(pub) || // Cyrillic characters
+          pub.toLowerCase().includes('russian') ||
+          pub.toLowerCase().includes('советск') ||
+          pub.toLowerCase().includes('москва')
+        );
+        if (hasRussianPublisher) {
+          return false;
+        }
+      }
+
+      // 7. Check subjects for non-English indicators and Cyrillic characters
       if (book.subject && book.subject.length > 0) {
+        const hasRussianSubject = book.subject.some(subject => {
+          if (!subject) return false;
+          // Check for Cyrillic characters in subject
+          if (/[\u0400-\u04ff\u0500-\u052f]/.test(subject)) {
+            return true;
+          }
+          const subjectLower = subject.toLowerCase();
+          // Check for Russian-specific indicators
+          return subjectLower.includes('russian') ||
+                 subjectLower.includes('советск') ||
+                 subjectLower.includes('россия') ||
+                 subjectLower.includes('moskva') ||
+                 subjectLower.includes('soviet');
+        });
+        
+        if (hasRussianSubject) {
+          return false;
+        }
+        
+        // Also check for other foreign language indicators
         const nonEnglishSubjects = book.subject.some(subject => {
           if (!subject) return false;
           const subjectLower = subject.toLowerCase();
-          return subjectLower.includes('chinese') ||
-                 subjectLower.includes('spanish') ||
-                 subjectLower.includes('french') ||
-                 subjectLower.includes('german') ||
-                 subjectLower.includes('japanese') ||
-                 subjectLower.includes('korean') ||
-                 subjectLower.includes('arabic') ||
-                 subjectLower.includes('russian') ||
-                 subjectLower.includes('portuguese') ||
-                 subjectLower.includes('italian') ||
-                 subjectLower.includes('dutch') ||
-                 subjectLower.includes('hindi') ||
-                 subjectLower.includes('bengali') ||
-                 subjectLower.includes('urdu') ||
-                 subjectLower.includes('persian') ||
-                 subjectLower.includes('turkish') ||
-                 subjectLower.includes('hebrew') ||
-                 subjectLower.includes('polish') ||
-                 subjectLower.includes('czech') ||
-                 subjectLower.includes('hungarian') ||
-                 subjectLower.includes('swedish') ||
-                 subjectLower.includes('norwegian') ||
-                 subjectLower.includes('danish') ||
-                 subjectLower.includes('finnish') ||
-                 subjectLower.includes('greek') ||
-                 subjectLower.includes('vietnamese') ||
-                 subjectLower.includes('thai') ||
-                 subjectLower.includes('indonesian') ||
-                 subjectLower.includes('malay') ||
-                 subjectLower.includes('filipino') ||
-                 subjectLower.includes('tagalog');
+          return subjectLower.includes('chinese literature') ||
+                 subjectLower.includes('spanish literature') ||
+                 subjectLower.includes('french literature') ||
+                 subjectLower.includes('german literature') ||
+                 subjectLower.includes('japanese literature') ||
+                 subjectLower.includes('korean literature') ||
+                 subjectLower.includes('arabic literature') ||
+                 subjectLower.includes('portuguese literature') ||
+                 subjectLower.includes('italian literature') ||
+                 subjectLower.includes('foreign language');
         });
         
         if (nonEnglishSubjects) {
