@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { FiSearch, FiLoader } from 'react-icons/fi';
+import { FiSearch, FiLoader, FiAlertCircle } from 'react-icons/fi';
 import SearchResultCard from '@/components/SearchResult';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { SearchResult } from '@/types';
 import { mutate } from 'swr';
 import { getCoverUrl } from '@/lib/api/openLibrary';
@@ -12,12 +13,14 @@ export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
 
     setIsSearching(true);
+    setError(null);
     try {
       const response = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}&limit=20`);
       const data = await response.json();
@@ -25,11 +28,12 @@ export default function SearchPage() {
       if (data.success) {
         setResults(data.data);
       } else {
-        console.error('Search failed:', data.error);
+        setError(data.error || 'Search failed. Please try again.');
         setResults([]);
       }
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Failed to search books. Please check your internet connection and try again.');
       setResults([]);
     } finally {
       setIsSearching(false);
@@ -68,11 +72,13 @@ export default function SearchPage() {
         // Remove the book from search results
         setResults(prev => prev.filter(book => book.key !== key));
       } else {
-        const error = await response.json();
-        console.error('Failed to follow book:', error);
+        const errorData = await response.json();
+        console.error('Failed to follow book:', errorData);
+        setError(errorData.error || 'Failed to follow book. Please try again.');
       }
-    } catch (error) {
-      console.error('Error following book:', error);
+    } catch (err) {
+      console.error('Error following book:', err);
+      setError('Failed to follow book. Please check your connection and try again.');
     } finally {
       setFollowingIds(prev => {
         const newSet = new Set(Array.from(prev));
@@ -83,7 +89,8 @@ export default function SearchPage() {
   };
 
   return (
-    <div>
+    <ErrorBoundary>
+      <div>
       {/* Header with Search */}
       <div className="sticky top-0 z-10 bg-white/80 dark:bg-dark-bg/80 backdrop-blur-md border-b border-gray-200 dark:border-dark-border">
         <div className="px-4 py-3">
@@ -109,6 +116,22 @@ export default function SearchPage() {
           </form>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500">
+          <div className="flex items-center">
+            <FiAlertCircle className="text-red-500 mr-2" size={20} />
+            <p className="text-red-800 dark:text-red-200">{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className="ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search Results */}
       <div className="p-4">
@@ -155,6 +178,7 @@ export default function SearchPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }

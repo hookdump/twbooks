@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import Sidebar from '@/components/Sidebar';
-
-const inter = Inter({ subsets: ['latin'] });
+import RightSidebar from '@/components/RightSidebar';
 
 export const metadata: Metadata = {
   title: 'TWBooks - Your Book Timeline',
@@ -24,14 +22,27 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-white dark:bg-dark-bg min-h-screen`}>
-        <div className="flex">
-          <Sidebar />
-          <main className="flex-1 ml-64">
-            <div className="max-w-2xl mx-auto border-x border-gray-200 dark:border-dark-border min-h-screen bg-white dark:bg-dark-bg">
-              {children}
+      <body className="bg-white dark:bg-black min-h-screen">
+        <div className="min-h-screen">
+          {/* Twitter-like 3-column layout */}
+          <div className="max-w-6xl mx-auto flex">
+            {/* Left Sidebar */}
+            <div className="w-64 xl:w-275">
+              <Sidebar />
             </div>
-          </main>
+
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0 max-w-2xl border-x border-gray-200 dark:border-gray-800">
+              <main className="min-h-screen bg-white dark:bg-black">
+                {children}
+              </main>
+            </div>
+
+            {/* Right Sidebar - hidden on smaller screens */}
+            <div className="w-80 hidden lg:block">
+              <RightSidebar />
+            </div>
+          </div>
         </div>
       </body>
     </html>

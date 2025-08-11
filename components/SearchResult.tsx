@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { SearchResult } from '@/types';
-import { FiPlus, FiLoader } from 'react-icons/fi';
+import { FiPlus, FiLoader, FiBook } from 'react-icons/fi';
 
 interface SearchResultProps {
   result: SearchResult;
@@ -34,8 +34,8 @@ export default function SearchResultCard({ result, onFollow, isFollowing = false
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-secondary text-2xl">
-                📚
+              <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dark-text-secondary">
+                <FiBook size={24} />
               </div>
             )}
           </div>
