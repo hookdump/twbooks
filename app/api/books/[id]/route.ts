@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/db/sqlite';
+import { getDatabase } from '@/lib/db';
 import { ApiResponse } from '@/types';
 
 // DELETE /api/books/[id] - Unfollow a book

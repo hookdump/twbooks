@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDatabase } from '@/lib/db/sqlite';
+import { getDatabase } from '@/lib/db';
 import { getBookQuote } from '@/lib/utils/quotes';
 import { generateAmazonLink } from '@/lib/utils/amazon';
 import { ApiResponse, Book } from '@/types';

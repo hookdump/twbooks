@@ -17,7 +17,7 @@ A Twitter-like interface for books where you can follow your favorite books and 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS with custom Twitter-like theme
-- **Database**: SQLite with better-sqlite3
+- **Database**: SQLite (local) / Vercel KV (production)
 - **Data Fetching**: SWR for client-side data management
 - **Icons**: React Icons (Feather)
 - **External APIs**: Open Library for book search
@@ -48,6 +48,25 @@ A Twitter-like interface for books where you can follow your favorite books and 
    ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Deploying to Vercel
+
+For production deployment on Vercel with persistent storage:
+
+1. Deploy to Vercel:
+   ```bash
+   vercel --prod
+   ```
+
+2. Set up Vercel KV database:
+   - Go to your Vercel project dashboard
+   - Navigate to Storage → Create Database → KV
+   - Follow the setup wizard
+   - Environment variables will be automatically configured
+
+3. Redeploy your application
+
+See [VERCEL_KV_SETUP.md](./VERCEL_KV_SETUP.md) for detailed instructions.
 
 ### Building for Production
 
@@ -85,7 +104,11 @@ npm start
 
 ## Database Schema
 
-The application uses SQLite with the following schema:
+The application uses a flexible database abstraction that supports:
+- **SQLite** (local development)
+- **Vercel KV** (production on Vercel)
+
+Both implementations use the same schema structure:
 
 ### Books Table
 - `id` - Primary key (UUID)
@@ -100,6 +123,19 @@ The application uses SQLite with the following schema:
 - `published_date` - Publication date (optional)
 - `page_count` - Number of pages (optional)
 - `goodreads_id` - Goodreads ID (optional)
+
+### Database Switching Logic
+
+The application automatically detects the environment and uses the appropriate database:
+
+- **Local Development**: Uses SQLite database stored in `data/twbooks.db`
+- **Vercel Production**: Uses Vercel KV when environment variables are present
+- **Automatic Fallback**: Falls back to SQLite if KV is not properly configured
+
+Environment variables required for KV:
+- `KV_URL`
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
 
 ## Contributing
 
